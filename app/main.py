@@ -11,7 +11,7 @@ uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
 
-    st.subheader("Dataset Preview")
+    st.subheader("Preview of the dataset")
     st.dataframe(df)
 
     required_cols = ["SKU", "Demand", "Inventory", "Lead Time"]
