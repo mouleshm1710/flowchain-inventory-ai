@@ -51,6 +51,6 @@ if uploaded_file is not None:
         )
 
         st.subheader("Summary")
-        st.write(f"Average Demand: {avg_demand:.2f}")
+        #st.write(f"Average Demand: {avg_demand:.2f}")
         st.write(f"Stockout Risk Count: {df['Stockout Risk'].sum()}")
         st.write(f"Overstock Risk Count: {df['Overstock Risk'].sum()}")
