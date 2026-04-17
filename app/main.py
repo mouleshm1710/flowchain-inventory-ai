@@ -20,6 +20,11 @@ with col2:
         "Optional columns: Price, Promotion, Region, Category."
     )
 
+# adding filters
+selected_region = st.selectbox("Select Region", ["All"] + list(df["Region"].unique()))
+if selected_region != "All":
+    df = df[df["Region"] == selected_region]
+    
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
 
