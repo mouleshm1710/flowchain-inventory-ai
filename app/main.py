@@ -79,7 +79,7 @@ if uploaded_file is not None:
             "Risk Type": ["Stockout Risk", "Overstock Risk"],
             "Count": [df["Stockout Risk"].sum(), df["Overstock Risk"].sum()],
             })
-        st.bar_chart(risk_counts.set_index("Risk Type"))
+            st.bar_chart(risk_counts.set_index("Risk Type"))
     
 
         
