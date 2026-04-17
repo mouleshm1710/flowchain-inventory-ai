@@ -30,6 +30,11 @@ if uploaded_file is not None:
     selected_region = st.selectbox("Select Region", ["All"] + list(df["Region"].unique()))
     if selected_region != "All":
         df = df[df["Region"] == selected_region]
+
+    #adding "category" filter
+    selected_category = st.selectbox("Select Category", ["All"] + list(df["Category"].unique()))
+if selected_category != "All":
+    df = df[df["Category"] == selected_category]
     
     st.subheader("1. Dataset Preview")
     st.dataframe(df)
