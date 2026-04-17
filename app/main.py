@@ -33,8 +33,8 @@ if uploaded_file is not None:
 
     #adding "category" filter
     selected_category = st.selectbox("Select Category", ["All"] + list(df["Category"].unique()))
-if selected_category != "All":
-    df = df[df["Category"] == selected_category]
+    if selected_category != "All":
+        df = df[df["Category"] == selected_category]
     
     st.subheader("1. Dataset Preview")
     st.dataframe(df)
