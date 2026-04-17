@@ -53,10 +53,11 @@ if uploaded_file is not None:
 
         def recommendation(row):
             if row["Stockout Risk"]:
-                return "Review replenishment quantity or timing"
+                return "🔴 Review replenishment quantity or timing"
             if row["Overstock Risk"]:
-                return "Reduce inventory exposure or investigate slow-moving demand"
-            return "Inventory level appears normal"
+                return "🟠 Reduce inventory exposure or investigate slow-moving demand"
+            return "✅ 
+            Inventory level appears normal"
 
         df["Recommendation"] = df.apply(recommendation, axis=1)
 
