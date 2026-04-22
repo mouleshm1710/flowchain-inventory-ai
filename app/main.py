@@ -82,7 +82,7 @@ if uploaded_file is not None:
         st.markdown("---")
         st.subheader("3. Visual Insights")
 
-        col1, col2 = st.columns(2)
+        col1 = st.columns(1)
 
         with col1:
             st.markdown("#### Demand vs Inventory by SKU")
