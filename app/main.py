@@ -17,25 +17,28 @@ with col1:
 with col2:
     st.info(
         "Required columns: SKU, Demand, Inventory, Lead Time.\n\n"
-        "Optional columns: Price, Promotion, Region, Category."
+        "Optional columns: Price, Promotion, Region, Category, Date."
     )
 
-
-
-    
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
 
-    #adding "region" filter
-    selected_region = st.selectbox("Select Region", ["All"] + list(df["Region"].unique()))
-    if selected_region != "All":
-        df = df[df["Region"] == selected_region]
+    # Convert Date column if available
+    if "Date" in df.columns:
+        df["Date"] = pd.to_datetime(df["Date"])
 
-    #adding "category" filter
-    selected_category = st.selectbox("Select Category", ["All"] + list(df["Category"].unique()))
-    if selected_category != "All":
-        df = df[df["Category"] == selected_category]
-    
+    # adding "region" filter
+    if "Region" in df.columns:
+        selected_region = st.selectbox("Select Region", ["All"] + sorted(df["Region"].dropna().unique().tolist()))
+        if selected_region != "All":
+            df = df[df["Region"] == selected_region]
+
+    # adding "category" filter
+    if "Category" in df.columns:
+        selected_category = st.selectbox("Select Category", ["All"] + sorted(df["Category"].dropna().unique().tolist()))
+        if selected_category != "All":
+            df = df[df["Category"] == selected_category]
+
     st.subheader("1. Dataset Preview")
     st.dataframe(df)
 
@@ -43,9 +46,9 @@ if uploaded_file is not None:
     missing_cols = [col for col in required_cols if col not in df.columns]
 
     st.markdown("---")
-    
     st.subheader("2. Risk Analysis")
     st.markdown("Legend: 🔴 High Risk | 🟠 Medium Risk | ✅ Normal")
+
     if missing_cols:
         st.error(f"Missing required columns: {missing_cols}")
     else:
@@ -75,35 +78,4 @@ if uploaded_file is not None:
             ]
         )
 
-        # code for visualization/charts
-        st.markdown("---")
-        st.subheader("3. Visual Insights")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("#### Demand vs Inventory by SKU")
-            chart_data = df.set_index("SKU")[["Demand", "Inventory"]]
-            st.bar_chart(chart_data)
-
-        with col2:
-            st.markdown("#### Risk Distribution")
-            risk_counts = pd.DataFrame(
-            {
-            "Risk Type": ["Stockout Risk", "Overstock Risk"],
-            "Count": [df["Stockout Risk"].sum(), df["Overstock Risk"].sum()],
-            })
-            st.bar_chart(risk_counts.set_index("Risk Type"))
     
-
-        
-        st.markdown("---")
-        st.subheader("4. Summary Insights")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.metric("Stockout Risk Count", int(df["Stockout Risk"].sum()))
-
-        with col2:
-            st.metric("Overstock Risk Count", int(df["Overstock Risk"].sum()))
