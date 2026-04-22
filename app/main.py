@@ -110,4 +110,15 @@ if uploaded_file is not None:
         with col2:
             st.metric("Overstock Risk Count", int(df["Overstock Risk"].sum()))
 
-        
+         # -------------------------------
+        # Phase 2: Demand Trend Analysis
+        # -------------------------------
+        if "Date" in df.columns:
+            st.markdown("---")
+            st.subheader("5. Demand Trend Analysis")
+
+            sku_options = sorted(df["SKU"].dropna().unique().tolist())
+            selected_sku = st.selectbox("Select SKU for Trend Analysis", sku_options)
+
+            sku_df = df[df["SKU"] == selected_sku].copy()
+            sku_df = sku_df.sort_values("Date")
