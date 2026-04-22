@@ -99,4 +99,15 @@ if uploaded_file is not None:
             )
             st.bar_chart(risk_counts.set_index("Risk Type"))
 
+        st.markdown("---")
+        st.subheader("4. Summary Insights")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric("Stockout Risk Count", int(df["Stockout Risk"].sum()))
+
+        with col2:
+            st.metric("Overstock Risk Count", int(df["Overstock Risk"].sum()))
+
         
