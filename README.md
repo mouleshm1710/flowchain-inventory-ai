@@ -10,8 +10,11 @@ The focus for the MVP phase is to develop a lightweight, interactive application
 
 ## Target Users
 Supply chain analysts 
+
 Inventory planners 
+
 Retail managers
+
 Demand Planners
 
 ## Key Features (Phase 1 MVP)
