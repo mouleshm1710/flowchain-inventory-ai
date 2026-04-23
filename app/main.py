@@ -138,16 +138,37 @@ if uploaded_file is not None:
                 trend_chart = sku_df.set_index("Date")[["Demand", "Moving Average (3)"]]
                 st.line_chart(trend_chart)
 
+                st.markdown("#### Trend Interpretation")
+
                 if trend_label == "Increasing Trend":
-                    insight_text = "Recent demand is trending above its short-term average, indicating a potential upward demand pattern."
+                    st.write(
+                        "Recent demand is moving above its short-term average, which may indicate strengthening product movement. "
+                        "This pattern can be monitored further to assess whether inventory planning needs to be adjusted."
+                    )
                 elif trend_label == "Declining Trend":
-                    insight_text = "Recent demand is trending below its short-term average, indicating a potential softening in demand."
+                    st.write(
+                        "Recent demand is moving below its short-term average, which may indicate softening product movement. "
+                        "This pattern can be reviewed further to assess whether inventory exposure should be watched closely."
+                    )
                 elif trend_label == "Stable Trend":
-                    insight_text = "Recent demand is close to its short-term average, indicating relatively stable demand behavior."
+                    st.write(
+                        "Recent demand is staying close to its short-term average, suggesting relatively stable product movement "
+                        "over the observed periods."
+                    )
                 else:
-                    insight_text = "Not enough data is available to determine a demand trend."
+                    st.write(
+                        "There is not enough historical information available to interpret the current demand trend reliably."
+                    )
+                                # if trend_label == "Increasing Trend":
+                #     insight_text = "Recent demand is trending above its short-term average, indicating a potential upward demand pattern."
+                # elif trend_label == "Declining Trend":
+                #     insight_text = "Recent demand is trending below its short-term average, indicating a potential softening in demand."
+                # elif trend_label == "Stable Trend":
+                #     insight_text = "Recent demand is close to its short-term average, indicating relatively stable demand behavior."
+                # else:
+                #     insight_text = "Not enough data is available to determine a demand trend."
                 
-                st.info(insight_text)
+                # st.info(insight_text)
                 
             else:
                 st.warning("At least 3 time periods are required for trend analysis.")
