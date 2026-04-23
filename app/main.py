@@ -82,23 +82,10 @@ if uploaded_file is not None:
         st.markdown("---")
         st.subheader("3. Visual Insights")
 
-        #col1 = st.columns(1)
-
-        #with col1:
         st.markdown("#### Demand vs Inventory by SKU")
         chart_data = df.groupby("SKU")[["Demand", "Inventory"]].mean()
         st.bar_chart(chart_data)
-
-        # with col2:
-        #     st.markdown("#### Risk Distribution")
-        #     risk_counts = pd.DataFrame(
-        #         {
-        #             "Risk Type": ["Stockout Risk", "Overstock Risk"],
-        #             "Count": [df["Stockout Risk"].sum(), df["Overstock Risk"].sum()],
-        #         }
-        #     )
-        #     st.bar_chart(risk_counts.set_index("Risk Type"))
-
+        
         st.markdown("---")
         st.subheader("4. Summary Insights")
 
@@ -162,16 +149,5 @@ if uploaded_file is not None:
                 
                 st.info(insight_text)
                 
-                st.markdown("#### Trend Analysis Table")
-                st.dataframe(
-                    sku_df[
-                        [
-                            "SKU",
-                            "Date",
-                            "Demand",
-                            "Moving Average (3)",
-                        ]
-                    ]
-                )
             else:
                 st.warning("At least 3 time periods are required for trend analysis.")
