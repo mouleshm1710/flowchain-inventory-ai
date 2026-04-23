@@ -142,3 +142,21 @@ if uploaded_file is not None:
 
                 trend_chart = sku_df.set_index("Date")[["Demand", "Moving Average (3)"]]
                 st.line_chart(trend_chart)
+                st.markdown(f"**Trend Classification:** {trend_label}")
+
+                trend_chart = sku_df.set_index("Date")[["Demand", "Moving Average (3)"]]
+                st.line_chart(trend_chart)
+
+                st.markdown("#### Trend Analysis Table")
+                st.dataframe(
+                    sku_df[
+                        [
+                            "SKU",
+                            "Date",
+                            "Demand",
+                            "Moving Average (3)",
+                        ]
+                    ]
+                )
+            else:
+                st.warning("At least 3 time periods are required for trend analysis.")
