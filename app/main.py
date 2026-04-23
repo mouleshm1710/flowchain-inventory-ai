@@ -122,3 +122,23 @@ if uploaded_file is not None:
 
             sku_df = df[df["SKU"] == selected_sku].copy()
             sku_df = sku_df.sort_values("Date")
+
+if len(sku_df) >= 3:
+                sku_df["Moving Average (3)"] = sku_df["Demand"].rolling(window=3).mean()
+
+                latest_demand = sku_df["Demand"].iloc[-1]
+                latest_ma = sku_df["Moving Average (3)"].iloc[-1]
+
+                if pd.isna(latest_ma):
+                    trend_label = "Insufficient data"
+                elif latest_demand > latest_ma:
+                    trend_label = "Increasing Trend"
+                elif latest_demand < latest_ma:
+                    trend_label = "Declining Trend"
+                else:
+                    trend_label = "Stable Trend"
+
+                st.markdown(f"**Trend Classification:** {trend_label}")
+
+                trend_chart = sku_df.set_index("Date")[["Demand", "Moving Average (3)"]]
+                st.line_chart(trend_chart)
