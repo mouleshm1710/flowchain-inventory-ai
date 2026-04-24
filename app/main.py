@@ -224,3 +224,9 @@ if uploaded_file is not None:
                     except Exception as e:
                             st.error(f"Holt-Winters forecasting failed: {e}")
                             forecast_output = None
+
+            elif selected_model == "Prophet":
+                try:
+                    prophet_df = ts_df.rename(columns={"Date": "ds", "Demand": "y"})
+
+
