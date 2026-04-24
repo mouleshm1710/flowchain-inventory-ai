@@ -185,3 +185,9 @@ if uploaded_file is not None:
             forecast_df = forecast_df.sort_values("Date")
         
             forecast_horizon = st.selectbox("Forecast Horizon", [3, 6])
+
+            model_options = ["Holt-Winters"]
+            if PROPHET_AVAILABLE:
+                model_options.append("Prophet")
+
+            selected_model = st.selectbox("Select Forecasting Model", model_options)
