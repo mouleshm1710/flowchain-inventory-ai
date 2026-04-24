@@ -9,6 +9,7 @@ try:
 except Exception:
     PROPHET_AVAILABLE = False
 
+
 st.set_page_config(page_title="FlowChain Inventory Risk Intelligence AI - MVP", layout="wide")
 
 st.title("FlowChain Inventory Risk Intelligence AI - MVP")
@@ -28,22 +29,28 @@ with col2:
         "Optional columns: Price, Promotion, Region, Category, Date."
     )
 
+
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
 
-    # Convert Date column if available
+    # Force monthly granularity using month-start dates
     if "Date" in df.columns:
-        df["Date"] = pd.to_datetime(df["Date"])
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+        df["Date"] = df["Date"].dt.to_period("M").dt.to_timestamp()
 
-    # adding "region" filter
     if "Region" in df.columns:
-        selected_region = st.selectbox("Select Region", ["All"] + sorted(df["Region"].dropna().unique().tolist()))
+        selected_region = st.selectbox(
+            "Select Region",
+            ["All"] + sorted(df["Region"].dropna().unique().tolist())
+        )
         if selected_region != "All":
             df = df[df["Region"] == selected_region]
 
-    # adding "category" filter
     if "Category" in df.columns:
-        selected_category = st.selectbox("Select Category", ["All"] + sorted(df["Category"].dropna().unique().tolist()))
+        selected_category = st.selectbox(
+            "Select Category",
+            ["All"] + sorted(df["Category"].dropna().unique().tolist())
+        )
         if selected_category != "All":
             df = df[df["Category"] == selected_category]
 
@@ -86,14 +93,13 @@ if uploaded_file is not None:
             ]
         )
 
-    # code for visualization/charts
         st.markdown("---")
         st.subheader("3. Visual Insights")
 
         st.markdown("#### Demand vs Inventory by SKU")
         chart_data = df.groupby("SKU")[["Demand", "Inventory"]].mean()
         st.bar_chart(chart_data)
-        
+
         st.markdown("---")
         st.subheader("4. Summary Insights")
 
@@ -105,7 +111,7 @@ if uploaded_file is not None:
         with col2:
             st.metric("Overstock Risk Count", int(df["Overstock Risk"].sum()))
 
-         # -------------------------------
+        # -------------------------------
         # Phase 2: Demand Trend Analysis
         # -------------------------------
         if "Date" in df.columns:
@@ -119,16 +125,23 @@ if uploaded_file is not None:
             sku_df = sku_df.sort_values("Date")
 
             if len(sku_df) >= 3:
-                sku_df["Moving Average (3)"] = sku_df["Demand"].rolling(window=3).mean().round(0).astype("Int64")
+                sku_df["Moving Average (3)"] = (
+                    sku_df["Demand"]
+                    .rolling(window=3)
+                    .mean()
+                    .round(0)
+                    .astype("Int64")
+                )
 
                 latest_demand = sku_df["Demand"].iloc[-1]
                 latest_ma = sku_df["Moving Average (3)"].iloc[-1]
+
                 if pd.isna(latest_ma) or latest_ma == 0:
                     trend_label = "Insufficient data"
                     deviation_pct = None
                 else:
                     deviation_pct = ((latest_demand - latest_ma) / latest_ma) * 100
-                
+
                     if deviation_pct > 5:
                         trend_label = "Increasing Trend"
                     elif deviation_pct < -5:
@@ -136,13 +149,13 @@ if uploaded_file is not None:
                     else:
                         trend_label = "Stable Trend"
 
-                
                 st.markdown(f"**Trend Classification:** {trend_label}")
+
                 if deviation_pct is not None:
                     st.write(f"Latest Demand: {int(latest_demand)}")
                     st.write(f"3-Period Moving Average: {int(latest_ma)}")
                     st.write(f"Demand Deviation vs Moving Average: {deviation_pct:.1f}%")
-    
+
                 trend_chart = sku_df.set_index("Date")[["Demand", "Moving Average (3)"]]
                 st.line_chart(trend_chart)
 
@@ -167,25 +180,29 @@ if uploaded_file is not None:
                     st.write(
                         "There is not enough historical information available to interpret the current demand trend reliably."
                     )
-                
+
             else:
                 st.warning("At least 3 time periods are required for trend analysis.")
-
 
             # -------------------------------
             # Phase 2: Demand Forecasting Module
             # -------------------------------
             st.markdown("---")
             st.subheader("6. Demand Forecasting Module")
-        
+
             forecast_sku_options = sorted(df["SKU"].dropna().unique().tolist())
             forecast_sku = st.selectbox("Select SKU for Forecasting", forecast_sku_options)
-        
+
             forecast_df = df[df["SKU"] == forecast_sku].copy()
-            forecast_df = forecast_df.sort_values("Date")
-        
-            #forecast_horizon = st.selectbox("Forecast Horizon", [3, 6])
-            forecast_horizon = st.selectbox("Forecast Horizon (Months Ahead)",[3, 6])
+
+            forecast_horizon = st.selectbox(
+                "Forecast Horizon (Months Ahead)",
+                [3, 6]
+            )
+
+            st.caption(
+                "Forecasts are generated at monthly granularity. Historical dates are normalized to month-start dates."
+            )
 
             model_options = ["Holt-Winters"]
             if PROPHET_AVAILABLE:
@@ -197,8 +214,15 @@ if uploaded_file is not None:
                 st.warning("At least 6 historical periods are recommended for forecasting.")
             else:
                 ts_df = forecast_df[["Date", "Demand"]].copy()
+
+                # Ensure monthly historical series
+                ts_df["Date"] = pd.to_datetime(ts_df["Date"], errors="coerce")
+                ts_df["Date"] = ts_df["Date"].dt.to_period("M").dt.to_timestamp()
+
                 ts_df = ts_df.groupby("Date", as_index=False)["Demand"].sum()
                 ts_df = ts_df.sort_values("Date")
+
+                forecast_output = None
 
                 if selected_model == "Holt-Winters":
                     try:
@@ -209,67 +233,61 @@ if uploaded_file is not None:
                         )
                         fitted_model = model.fit()
                         forecast_values = fitted_model.forecast(forecast_horizon)
-        
-                        # last_date = ts_df["Date"].max()
-                        # future_dates = pd.date_range(
-                        #     start=last_date + pd.DateOffset(months=1),
-                        #     periods=forecast_horizon,
-                        #     freq="MS"
-                        # )
 
                         last_date = pd.to_datetime(ts_df["Date"].max())
                         next_month_start = last_date + pd.offsets.MonthBegin(1)
-                        
+
                         future_dates = pd.date_range(
                             start=next_month_start,
                             periods=forecast_horizon,
                             freq="MS"
                         )
-        
+
                         forecast_output = pd.DataFrame({
                             "Date": future_dates,
                             "Forecasted Demand": forecast_values.round(0).astype(int).values
                         })
-                    
+
                     except Exception as e:
-                            st.error(f"Holt-Winters forecasting failed: {e}")
-                            forecast_output = None
+                        st.error(f"Holt-Winters forecasting failed: {e}")
 
                 elif selected_model == "Prophet":
                     try:
                         prophet_df = ts_df.rename(columns={"Date": "ds", "Demand": "y"})
+
                         model = Prophet(
-                        yearly_seasonality=False,
-                        weekly_seasonality=False,
-                        daily_seasonality=False
+                            yearly_seasonality=False,
+                            weekly_seasonality=False,
+                            daily_seasonality=False
                         )
                         model.fit(prophet_df)
-        
+
                         future = model.make_future_dataframe(
                             periods=forecast_horizon,
                             freq="MS"
                         )
-        
+
                         forecast = model.predict(future)
-        
+
                         forecast_output = forecast[["ds", "yhat"]].tail(forecast_horizon)
                         forecast_output = forecast_output.rename(
                             columns={"ds": "Date", "yhat": "Forecasted Demand"}
                         )
+                        forecast_output["Date"] = pd.to_datetime(forecast_output["Date"])
+                        forecast_output["Date"] = forecast_output["Date"].dt.to_period("M").dt.to_timestamp()
                         forecast_output["Forecasted Demand"] = (
                             forecast_output["Forecasted Demand"].round(0).astype(int)
                         )
-    
+
                     except Exception as e:
                         st.error(f"Prophet forecasting failed: {e}")
-                        forecast_output = None
 
                 if forecast_output is not None:
                     st.markdown("#### Forecast Output")
                     st.dataframe(forecast_output)
-        
+
                     fig = go.Figure()
-        
+
                     fig.add_trace(
                         go.Scatter(
                             x=ts_df["Date"],
@@ -278,7 +296,7 @@ if uploaded_file is not None:
                             name="Actual Demand"
                         )
                     )
-        
+
                     fig.add_trace(
                         go.Scatter(
                             x=forecast_output["Date"],
@@ -287,13 +305,12 @@ if uploaded_file is not None:
                             name="Forecasted Demand"
                         )
                     )
-        
+
                     fig.update_layout(
-                        title=f"Actual vs Forecasted Demand for {forecast_sku}",
-                        xaxis_title="Date",
+                        title=f"Actual vs Forecasted Monthly Demand for {forecast_sku}",
+                        xaxis_title="Month",
                         yaxis_title="Demand",
                         legend_title="Series"
                     )
-        
-                    st.plotly_chart(fig, use_container_width=True)
 
+                    st.plotly_chart(fig, use_container_width=True)
