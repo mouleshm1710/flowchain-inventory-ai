@@ -14,7 +14,7 @@ st.set_page_config(page_title="FlowChain Inventory Risk Intelligence AI - MVP", 
 
 st.title("FlowChain Inventory Risk Intelligence AI - MVP")
 st.markdown(
-    "Analyze inventory data to identify **stockout** and **overstock** risks using a simple rule-based decision support workflow."
+    "Analyze inventory data to identify **stockout** and **overstock** risks using a simple rule-based decision support workflow. Provide insights on demand trends with future projections"
 )
 st.markdown("---")
 
