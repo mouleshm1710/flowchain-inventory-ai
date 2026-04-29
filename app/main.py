@@ -288,8 +288,8 @@ if uploaded_file is not None:
                         st.error(f"Prophet forecasting failed: {e}")
 
                 if forecast_output is not None:
-                    st.markdown("#### Forecast Output")
-                    st.dataframe(forecast_output)
+                    #st.markdown("#### Forecast Output")
+                    #st.dataframe(forecast_output)
 
                     fig = go.Figure()
 
